@@ -3,40 +3,196 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Page Title</title>
+    <title>Naive Bayes Classifier</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="app.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="app.css" />
     <style>
-        .container {
-            padding-top: 200px;
-            width: 600px;
-            margin: auto;
+        .card {
+            box-shadow: 0 18px 35px rgba(50,50,93,.1), 0 8px 15px rgba(0,0,0,.07);
+            border-radius:20px;
+            height: 650px;
         }
-        textarea {
-            width: 100%;
+        .col-8 .card {
+            height:200px;
+        }
+        .top{
+            position: relative;
+        }
+        .bottom{
+            position: absolute;
+            margin-top:-80px;
+        }
+        .top .card {
+            background-color: rgb(0,176,240);
+        }
+        .top h2 {
+            color: white;
+        }
+        .btn{
+            color: white;
+            background-color: rgb(0,188,212);
+        }
+        .train .card {
+            height: 400px !important;
+        }
+        .nav{
+          margin-top: 80px;
         }
     </style>
 </head>
 <body>
-    <div class="row">
-        <div class="col-sm-6">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Special title treatment</h5>
-              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-              <a href="#" class="btn btn-primary">Go somewhere</a>
+    <div class="container">
+        <ul class="nav nav-tabs justify-content-center" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Testing</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Training</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+            <div class="container-fluid top">
+                <div class="row justify-content-center mt-5">
+                    <div class="col-8">
+                        <div class="card p-4 ">
+                            <h2 class="text-center">Naive Bayes Classifier</h2>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-        <div class="col-sm-6">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Special title treatment</h5>
-              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-              <a href="#" class="btn btn-primary">Go somewhere</a>
+            <div class="container-fluid bottom">
+                <div class="row">
+                    <div class="col-4">
+                        <div class="card p-3">
+                            <form action="main.php" method="POST">
+                                <div class="form-group">
+                                    <h4 for="emailInput">Input Pesan</h4>
+                                    <textarea class="form-control" id="emailInput" rows="8" name="email"></textarea>
+                                </div>
+                                <input class="btn float-right" type="submit" value="submit"> 
+                            </form>
+                            <h4 class="mt-4">Pesan: </h4>
+                            <div class="form-group">
+                                <textarea readonly class="form-control" id="emailInput" rows="10" name="email"><?php if(empty($email)){echo "";} else echo $email;?></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="card p-3">
+                            <div>
+                                <h4>Hasil Stop Word: </h4>
+                                <div class="form-group">
+                                    <textarea readonly class="form-control" id="emailInput" rows="10" name="email"><?php if(empty($tokenize)){echo "";} 
+                                        else echo json_encode($tokenize);?>
+                                    </textarea>
+                                </div>
+                                <h4>Hasil Stemming: </h4>
+                                <div class="form-group">
+                                    <textarea readonly class="form-control" id="emailInput" rows="10" name="email"><?php if(empty($tokenize)){echo "";} 
+                                        else echo json_encode($stemmedArray);?>
+                                    </textarea>
+                                </div>
+        
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="card p-3">
+                            <div>
+                                <h4>Probabilitas Spam:</h4>
+                                <div class="form-group">
+                                    <textarea readonly class="form-control" id="emailInput" rows="2" name="email"><?php if(empty($spamWeight)){echo "";
+                                        } else echo $spamWeight;?>
+                                    </textarea>
+                                </div>
+                                <h4>Probabilitas Ham:</h4>
+                                <div class="form-group">
+                                    <textarea readonly class="form-control" id="emailInput" rows="2" name="email"><?php if(empty($hamWeight)){echo "";
+                                        } else echo $hamWeight;?>
+                                    </textarea>
+                                </div>                    
+                                <h4>Hasil Klasifikasi:</h4>
+                                <div class="form-group">
+                                    <textarea readonly class="form-control" id="emailInput" rows="2" name="email"><?php if(empty($category)){echo "";
+                                        } else echo $category;?>
+                                    </textarea>        
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-5 mb-5 train">
+                    <div class="col-4">
+                        <div class="card p-3">
+                            <form action="main.php" method="POST">
+                                <div class="form-group">
+                                    <h5 for="emailInput">Input Ham Training Data</h5>
+                                    <textarea class="form-control" id="emailInput" rows="10" name="hamTrainer"></textarea>
+                                </div>
+                                <input class="btn float-right" type="submit" value="submit"> 
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="card p-3">
+                            <form action="main.php" method="POST">
+                                <div class="form-group">
+                                    <h5 for="emailInput">Input Spam Training Data</h5>
+                                    <textarea class="form-control" id="emailInput" rows="10" name="spamTrainer"></textarea>
+                                </div>
+                                <input class="btn float-right" type="submit" value="submit"> 
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
+
+        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+            <div class="container-fluid top">
+                <div class="row justify-content-center mt-5">
+                    <div class="col-8">
+                        <div class="card p-4 ">
+                            <h2 class="text-center">Naive Bayes Classifier</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid bottom">
+                <div class="row justify-content-center train">
+                    <div class="col-5">
+                        <div class="card p-3">
+                            <form action="main.php" method="POST">
+                                <div class="form-group">
+                                    <h5 for="emailInput">Input Ham Training Data</h5>
+                                    <textarea class="form-control" id="emailInput" rows="10" name="hamTrainer"></textarea>
+                                </div>
+                                <input class="btn float-right" type="submit" value="submit"> 
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-5">
+                        <div class="card p-3">
+                            <form action="main.php" method="POST">
+                                <div class="form-group">
+                                    <h5 for="emailInput">Input Spam Training Data</h5>
+                                    <textarea class="form-control" id="emailInput" rows="10" name="spamTrainer"></textarea>
+                                </div>
+                                <input class="btn float-right" type="submit" value="submit"> 
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 </html>

@@ -129,6 +129,115 @@
     	 *   https://github.com/ttezel/bayes/blob/master/lib/naive_bayes.js
 		*/
 
+
+		public function spamPerWord($keywordsArray) {
+
+			$spam = Category::$SPAM;
+			
+			$wordIsSpam = array();
+
+    	    require 'db_connect.php';
+
+    		$sql = mysqli_query($conn, "SELECT count(*) as total FROM trainingSet WHERE  category = '$spam' ");
+    		$spamCount = mysqli_fetch_assoc($sql);
+    		$spamCount = $spamCount['total'];
+
+    		$sql = mysqli_query($conn, "SELECT count(*) as total FROM trainingSet ");
+    		$totalCount = mysqli_fetch_assoc($sql);
+    		$totalCount = $totalCount['total'];
+
+    		//p(spam)
+    		$pSpam = $spamCount / $totalCount;     		
+            
+            // no of distinct words (used for laplace smoothing)
+            $sql = mysqli_query($conn, "SELECT count(*) as total FROM wordFrequency ");
+    		$distinctWords = mysqli_fetch_assoc($sql);
+    		$distinctWords = $distinctWords['total'];
+
+    		// $bodyTextIsSpam = ($pSpam);
+    		foreach ($keywordsArray as $word) {
+    			$sql = mysqli_query($conn, "SELECT count as total FROM wordFrequency where word = '$word' and category = '$spam' ");
+    			$wordCount = mysqli_fetch_assoc($sql);
+    			$wordCount = $wordCount['total'];
+				$spamWord = (($wordCount + 1) / ($spamCount + $distinctWords));
+				array_push($wordIsSpam, $spamWord);
+    		}
+			
+			return $wordIsSpam;
+		}
+
+		public function hamPerWord($keywordsArray) {
+    		$ham = Category::$HAM;
+
+			$wordIsHam = array();
+			
+    	    require 'db_connect.php';
+
+    		$sql = mysqli_query($conn, "SELECT count(*) as total FROM trainingSet WHERE  category = '$ham' ");
+    		$hamCount = mysqli_fetch_assoc($sql);
+    		$hamCount = $hamCount['total'];
+
+    		$sql = mysqli_query($conn, "SELECT count(*) as total FROM trainingSet ");
+    		$totalCount = mysqli_fetch_assoc($sql);
+    		$totalCount = $totalCount['total'];
+
+    		//p(ham)
+			$pHam = $hamCount / $totalCount; 
+			    		
+            // no of distinct words (used for laplace smoothing)
+            $sql = mysqli_query($conn, "SELECT count(*) as total FROM wordFrequency ");
+    		$distinctWords = mysqli_fetch_assoc($sql);
+    		$distinctWords = $distinctWords['total'];
+
+    		foreach ($keywordsArray as $word) {
+    			$sql = mysqli_query($conn, "SELECT count as total FROM wordFrequency where word = '$word' and category = '$ham' ");
+    			$wordCount = mysqli_fetch_assoc($sql);
+    			$wordCount = $wordCount['total'];
+				$hamWord = (($wordCount + 1) / ($hamCount + $distinctWords));
+				array_push($wordIsHam, $hamWord);
+			}
+
+			return $wordIsHam;
+		}
+
+		// p(spam)
+		public function pspam() {
+			$spam = Category::$SPAM;
+
+			require 'db_connect.php';
+
+			$sql = mysqli_query($conn, "SELECT count(*) as total FROM trainingSet WHERE  category = '$spam' ");
+    		$spamCount = mysqli_fetch_assoc($sql);
+			$spamCount = $spamCount['total'];
+			
+			$sql = mysqli_query($conn, "SELECT count(*) as total FROM trainingSet ");
+    		$totalCount = mysqli_fetch_assoc($sql);
+			$totalCount = $totalCount['total'];
+			
+			$pSpam = $spamCount / $totalCount;
+
+			return $pSpam;
+		}
+
+		// p(ham)
+		public function pham() {
+			$ham = Category::$HAM;
+
+			require 'db_connect.php';
+			
+			$sql = mysqli_query($conn, "SELECT count(*) as total FROM trainingSet WHERE  category = '$ham' ");
+    		$hamCount = mysqli_fetch_assoc($sql);
+			$hamCount = $hamCount['total'];
+			
+			$sql = mysqli_query($conn, "SELECT count(*) as total FROM trainingSet ");
+    		$totalCount = mysqli_fetch_assoc($sql);
+			$totalCount = $totalCount['total'];
+			
+			$pHam = $hamCount / $totalCount;
+
+			return $pHam;
+		}
+
 		// spam weight
 		public function spam($keywordsArray) {
 			$spam = Category::$SPAM;
@@ -156,7 +265,7 @@
     			$sql = mysqli_query($conn, "SELECT count as total FROM wordFrequency where word = '$word' and category = '$spam' ");
     			$wordCount = mysqli_fetch_assoc($sql);
     			$wordCount = $wordCount['total'];
-    			$bodyTextIsSpam += (($wordCount + 1) / ($spamCount + $distinctWords));
+    			$bodyTextIsSpam *= (($wordCount + 1) / ($spamCount + $distinctWords));
 			}
 			
 			return $bodyTextIsSpam;
@@ -189,7 +298,7 @@
     			$sql = mysqli_query($conn, "SELECT count as total FROM wordFrequency where word = '$word' and category = '$ham' ");
     			$wordCount = mysqli_fetch_assoc($sql);
     			$wordCount = $wordCount['total'];
-    			$bodyTextIsHam += (($wordCount + 1) / ($hamCount + $distinctWords));
+    			$bodyTextIsHam *= (($wordCount + 1) / ($hamCount + $distinctWords));
 			}
 
 			return $bodyTextIsHam;
@@ -221,7 +330,9 @@
     		$pSpam = $spamCount / $totalCount; 
 
     		//p(ham)
-    		$pHam = $hamCount / $totalCount; 
+			$pHam = $hamCount / $totalCount; 
+			
+			$wordIsSpam = array();
     		
             
             // no of distinct words (used for laplace smoothing)
@@ -234,7 +345,8 @@
     			$sql = mysqli_query($conn, "SELECT count as total FROM wordFrequency where word = '$word' and category = '$spam' ");
     			$wordCount = mysqli_fetch_assoc($sql);
     			$wordCount = $wordCount['total'];
-    			$bodyTextIsSpam += (($wordCount + 1) / ($spamCount + $distinctWords));
+				$bodyTextIsSpam *= (($wordCount + 1) / ($spamCount + $distinctWords));
+				array_push($wordIsSpam, $bodyTextIsSpam);
     		}
 
     		$bodyTextIsHam = ($pHam);
@@ -242,7 +354,7 @@
     			$sql = mysqli_query($conn, "SELECT count as total FROM wordFrequency where word = '$word' and category = '$ham' ");
     			$wordCount = mysqli_fetch_assoc($sql);
     			$wordCount = $wordCount['total'];
-    			$bodyTextIsHam += (($wordCount + 1) / ($hamCount + $distinctWords));
+    			$bodyTextIsHam *= (($wordCount + 1) / ($hamCount + $distinctWords));
 			}
 			
 			// echo "p(spam|bodyText) = ".$bodyTextIsSpam."\n"."p(ham|bodyText) = ".$bodyTextIsHam."\n";
